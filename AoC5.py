@@ -9,6 +9,11 @@ while len(blank) != 0:
         code1 += dhash[5]
         if dhash[5] in blank:
             blank.remove(dhash[5])
-            code2[int(dhash[5])] = dhash[6]
+            code2[int(dhash[5])] = '\033[94m' + dhash[6] + '\033[0m'
+    else:
+        for i in blank:
+            code2[int(i)] = dhash[int(i)]
     n += 1
-print(code1[0:8], ''.join(code2))
+    if (n % 25000 == 1):
+        print('\r ' + code1[0:8] + ' ' + ''.join(code2), end="")
+print('\r ' + code1[0:8] + ' ' + ''.join(code2))

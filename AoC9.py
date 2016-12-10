@@ -5,19 +5,16 @@ def decompress(data, ver):
         if dcs == -1:
             outlength += len(data)
             break
-        text = data[:dcs]
-        data = data[dcs+1:]
-        work, data = data.split(')', 1)
+        outlength += len(data[:dcs])
+        work, data = data[dcs+1:].split(')', 1)
         num, rpt = work.split('x')
-        outlength += len(text)
         block = data[:int(num)]
         data = data[int(num):]
         if ver == 2:
             expanded = decompress(block, 2)
         else:
             expanded = len(block)
-        for _ in range(int(rpt)):
-            outlength += expanded
+        outlength += expanded * int(rpt)
     return outlength
 
 

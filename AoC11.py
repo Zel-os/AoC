@@ -19,6 +19,7 @@ import copy
 moves = [[2,0], [1,0], [1,1], [0,1], [0,2]]
 floors = [[0,0], [0,4], [5,1]]
 match = [[5,5], [0,0], [0,0]]
+history = set()
 mf = len(floors) - 1  #max floor index
 mx = 5  # max items
 e = 2  # elevator location
@@ -40,9 +41,9 @@ def isvalid(floorcheck):
     return valid
 
 
-def nextturn(tfloors, thistory, te, tt):
-    thistory.add(tform(tfloors, te))
-    print(tt, te, tfloors)
+def nextturn(tfloors, te, tt):
+    history.add(tform(tfloors, te))
+    #print(tt, te, tfloors)
     if tfloors == match:
         print(tt)
         return
@@ -51,16 +52,16 @@ def nextturn(tfloors, thistory, te, tt):
             test = copy.deepcopy(tfloors)
             test[te][0] -= m[0];  test[te][1] -= m[1]
             test[te-1][0] += m[0];  test[te-1][1] += m[1]
-            if tform(test, te-1) not in thistory and isvalid(test):
-                nextturn(test, thistory, te-1, tt+1)
+            if tform(test, te-1) not in history and isvalid(test):
+                nextturn(test, te-1, tt+1)
     if te < mf:
         for m in moves:  # down
             test = copy.deepcopy(tfloors)
             test[te][0] -= m[0];  test[te][1] -= m[1]
             test[te+1][0] += m[0];  test[te+1][1] += m[1]
-            if tform(test, te+1) not in thistory and isvalid(test):
-                nextturn(test, thistory, te+1, tt+1)
+            if tform(test, te+1) not in history and isvalid(test):
+                nextturn(test, te+1, tt+1)
+    history.remove(tform(tfloors, te))
 
 
-history = set()
-nextturn(floors, history, e, t)
+nextturn(floors, e, t)

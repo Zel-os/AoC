@@ -14,20 +14,38 @@
 # 3 = Q BM CM DM EM AM
 # 2 =   BG CG DG EG AG
 # 1 =
+
+# 4 =   -
+# 3 =   BM CM DM
+# 2 = Q BG CG DG EG AG EM AM
+# 1 =
+
+# 4 =   -
+# 3 = Q BM CM DM AM
+# 2 =   BG CG DG EG AG EM
+# 1 =
+
+# 4 =   -
+# 3 =   BM CM
+# 2 = Q BG CG DG EG AG DM EM AM
+# 1 =
+
+# 4 =   -
+# 3 = Q BM CM AM
+# 2 =   BG CG DG EG AG DM EM
+# 1 =
+
+# 4 =   -
+# 3 =   BM
+# 2 = Q BG CG DG EG AG DM EM CM AM
+# 1 =
+
+
 import copy
 
-moves = [[2,0], [1,0], [1,1], [0,1], [0,2]]
-floors = [[0,0], [0,4], [5,1]]
-match = [[5,5], [0,0], [0,0]]
-history = set()
-mf = len(floors) - 1  #max floor index
-mx = 5  # max items
-e = 2  # elevator location
-t = 1  # turn
 
-
-def tform(flist, te):
-    tlist = [te]
+def tform(flist, this_elevator):
+    tlist = [this_elevator]
     for f in flist:
         tlist.append(tuple(f))
     return tuple(tlist)
@@ -36,32 +54,57 @@ def tform(flist, te):
 def isvalid(floorcheck):
     valid = True
     for f in floorcheck:
-        if ((f[0] < f[1]) and (f[0] != 0)) or (f[0] < 0) or (f[0] > mx) or (f[1] < 0) or (f[1] > mx):
+        if ((f[0] < f[1]) and (f[0] != 0)) or (f[0] < 0) or (f[1] < 0):
             valid = False
     return valid
 
 
-def nextturn(tfloors, te, tt):
-    history.add(tform(tfloors, te))
-    #print(tt, te, tfloors)
-    if tfloors == match:
-        print(tt)
+def nextturn(this_floors, this_elevator, this_turn):
+    global best
+    if this_turn > 35:
         return
-    if te > 0:
+    #print("newturn", this_turn, "e"+str(this_elevator), tfloors)
+    if this_floors == match:
+        if this_turn < best:
+            best = this_turn
+            print(best)
+        return
+    history.add(tform(this_floors, this_elevator))
+    if this_elevator > 0:
+        next_elevator = this_elevator - 1
         for m in moves:  # up
-            test = copy.deepcopy(tfloors)
-            test[te][0] -= m[0];  test[te][1] -= m[1]
-            test[te-1][0] += m[0];  test[te-1][1] += m[1]
-            if tform(test, te-1) not in history and isvalid(test):
-                nextturn(test, te-1, tt+1)
-    if te < mf:
+            test = copy.deepcopy(this_floors)
+            test[this_elevator][0] -= m[0]
+            test[this_elevator][1] -= m[1]
+            test[next_elevator][0] += m[0]
+            test[next_elevator][1] += m[1]
+            #print(" - testing e"+ str(next_elevator), test)
+            if tform(test, next_elevator) not in history and isvalid(test):
+                nextturn(test, next_elevator, this_turn+1)
+    if this_elevator < max_floor:
+        next_elevator = this_elevator + 1
         for m in moves:  # down
-            test = copy.deepcopy(tfloors)
-            test[te][0] -= m[0];  test[te][1] -= m[1]
-            test[te+1][0] += m[0];  test[te+1][1] += m[1]
-            if tform(test, te+1) not in history and isvalid(test):
-                nextturn(test, te+1, tt+1)
-    history.remove(tform(tfloors, te))
+            test = copy.deepcopy(this_floors)
+            test[this_elevator][0] -= m[0]
+            test[this_elevator][1] -= m[1]
+            test[next_elevator][0] += m[0]
+            test[next_elevator][1] += m[1]
+            #print(" - testing e"+ str(next_elevator), test)
+            if tform(test, next_elevator) not in history and isvalid(test):
+                nextturn(test, next_elevator, this_turn+1)
+    history.remove(tform(this_floors, this_elevator))
+    #print("fail", this_turn, this_elevator, tfloors)
 
 
-nextturn(floors, e, t)
+moves = [[2,0], [1,0], [1,1], [0,1], [0,2]]
+floors = [[0,0], [0,4], [4,0], [1,1]]
+match = [[5,5], [0,0], [0,0], [0,0]]
+#floors = [[0,0], [1,0], [1,0], [0,2]]
+#match = [[2,2], [0,0], [0,0], [0,0]]
+history = set()
+max_floor = len(floors) - 1  #max floor index
+elevator = max_floor  # elevator location
+turn = 0  # turn
+best = 999
+
+nextturn(floors, elevator, turn)

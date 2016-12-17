@@ -19,9 +19,8 @@ def nextstep(path, loc):
 
 
 code = "udskfozm"
-location = [0, 0]
 best = "x"*1000
 worst = ""
-nextstep('', location)
+nextstep('', [0, 0])
 print("shortest path:", len(best), best)
 print("longest path: ", len(worst), worst)

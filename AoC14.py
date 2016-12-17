@@ -13,7 +13,7 @@ keys = []
 index = 0
 while len(keys) < 74:
     current_hash = md5((salt+str(index)).encode('utf-8')).hexdigest()
-    test = stretch(test)
+    current_hash = stretch(current_hash)
     for testindex, testval in possible_keys:
         if index > (testindex + 1000):
             possible_keys = [x for x in possible_keys if x[0] != testindex]

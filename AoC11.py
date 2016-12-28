@@ -1,17 +1,16 @@
-# 33/57
-
-# 4 = -
-# 3 = BM CM DM EM
-# 2 = BG CG DG EG
-# 1 = AG AM
-
-import copy
+import itertools
 
 
 def tform(state):
     tlist = [state[0]]
     for f in state[1:]:
-        tlist.append(tuple(f))
+        gen = ''; chp = ''
+        for piece in f:
+            if piece.isupper():
+                gen += piece
+            else:
+                chp += piece
+        tlist.append(str(len(gen))+'.'+str(len(chp)))
     return tuple(tlist)
 
 
@@ -20,17 +19,25 @@ def isvalid(state_check):
     if tform(state_check) in history:
         valid = False
     for f in state_check[1:]:
-        if ((f[0] < f[1]) and (f[0] != 0)) or (f[0] < 0) or (f[1] < 0):
-            valid = False
+        gen = ''; chp = ''
+        for piece in f:
+            if piece.isupper():
+                gen += piece
+            else:
+                chp += piece
+        if len(gen) > 0:
+            for c in chp:
+                if c.upper() not in gen:
+                    valid = False
     return valid
 
 
-def applymove(state, m, ud):
-    state[state[0]][0] -= m[0]
-    state[state[0]][1] -= m[1]
-    state[0] += ud
-    state[state[0]][0] += m[0]
-    state[state[0]][1] += m[1]
+def applymove(state, move, ud):
+    e = state[0]
+    state[0] = e + ud
+    for piece in move:
+        state[e] = state[e][:state[e].find(piece)] + state[e][state[e].find(piece)+1:]
+        state[e+ud] = ''.join(sorted(state[e+ud] + piece))
     return state
 
 
@@ -40,15 +47,17 @@ def tryagain(this_level, this_turn):
         if state == match:
             printsolution(state, this_turn)
             return
-        if state[0] < 4:
+        moves = [i for i in itertools.combinations(state[state[0]], 2)] + \
+                [i for i in itertools.combinations(state[state[0]], 1)]
+        if state[0] < 4:  # up
             for m in moves:
-                newstate = applymove(copy.deepcopy(state), m, 1)
+                newstate = applymove(state[:], m, 1)
                 if isvalid(newstate):
                     history[tform(newstate)] = state
                     next_level.append(newstate)
-        if state[0] > 1:
+        if state[0] > 1:  # down
             for m in moves:
-                newstate = applymove(copy.deepcopy(state), m, -1)
+                newstate = applymove(state[:], m, -1)
                 if isvalid(newstate):
                     history[tform(newstate)] = state
                     next_level.append(newstate)
@@ -63,15 +72,13 @@ def printsolution(state, tt):
         state = history[tform(state)]
 
 
-moves = [[2,0], [1,0], [1,1], [0,1], [0,2]]
+# Part 1
+# initial_state = [[1, 'Aa', 'BCDE', 'bcde', '']]
+# match = [4, '', '', '', 'ABCDEabcde']
 
-#initial_state = [[1, [0,2], [1,0], [1,0], [0,0]]]
-#match = [4, [0,0], [0,0], [0,0], [2,2]]
-initial_state = [[1, [1,1], [4,0], [0,4], [0,0]]]
-match = [4, [0,0], [0,0], [0,0], [5,5]]
-#initial_state = [[1, [3,3], [4,0], [0,4], [0,0]]]
-#match = [4, [0,0], [0,0], [0,0], [7,7]]
-
+# Part 2
+initial_state = [[1, 'AFGafg', 'BCDE', 'bcde', '']]
+match = [4, '', '', '', 'ABCDEFGabcdefg']
 
 history = {tform(initial_state[0]):0}
 tryagain(initial_state, 0)
